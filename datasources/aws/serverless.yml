@@ -77,6 +77,10 @@ provider:
     author: randy.pitcher@hashmapinc.com
     githubLink: https://github.com/hashmapinc/SnowWatch
     version: ${self:custom.version}
+  stackTags:
+    author: randy.pitcher@hashmapinc.com
+    githubLink: https://github.com/hashmapinc/SnowWatch
+    version: ${self:custom.version}
     
 
 # define lambda functions

@@ -1,4 +1,6 @@
 import boto3
+import BytesIO
+import gzip
 import datetime
 import json
 import logging
@@ -11,15 +13,49 @@ logger.setLevel(logging.INFO)
 S3_BUCKET_NAME = os.environ['S3_BUCKET_NAME']
 S3_MONITORING_PATH = os.environ['S3_CLOUDTRAIL_MONITORING_PATH']
 
-def saveProcessedJsonStringToS3(jsonString=None, s3Client):
+def getNewRecordsFromEventObject(event=None):
+    """
+    This function returns a list of (bucketName, objectKey) tuples
+    extracted from the event object.
+    """
+    if not event or not event["Records"]:
+        raise ValueError("no Records to process")
+    
+    s3Records = [eventRecord['s3'] for eventRecord in event['Records']]
+    return [(s3Record['bucket']['name'], s3Record['object']['key']) for s3Record in s3Records]
+
+
+def loadCloudtrailReportAsJsonObject(sourceBucketName=None, sourceBucketKey=None, s3Client=None):
+    """
+    This function loads the compressed cloudtrail (gz) json string
+    from s3 at the given bucketname and key location. The data is
+    then uncompressed to json string format and a parsed json
+    object is returned.
+    """
+    # validate input
+    if not sourceBucketName or not sourceBucketKey or not s3Client:
+        raise ValueError("cannot accept None / empty values")
+    
+    # load raw body from s3
+    response = s3Client.get_object(Bucket=sourceBucketName, Key=sourceBucketKey)
+    rawBody = response['Body'].read()
+
+    # process compressed bytes data into json string
+    bodyContent = gzip.GzipFile(fileobj=BytesIO(rawBody)).read()
+
+    # return processed json object
+    return json.loads(bodyContent)
+
+
+def saveProcessedJsonStringToS3(jsonString=None, s3Client=None):
     """
     This function saves the jsonString as a new 
     monitoring report json in the S3_BUCKET_NAME at
     the S3_MONITORING_PATH directory
     """
     # validate input
-    if not jsonString:
-        raise ValueError
+    if not jsonString or not s3Client:
+        raise ValueError("cannot accept None / empty values")
 
     # get s3 key and body
     key = S3_MONITORING_PATH + '/' + datetime.datetime.utcnow().isoformat() + '.json'
@@ -36,17 +72,17 @@ def monitor(event, context):
     snowflake-friendly, preprocessed json files with the 
     cloudtrail data to s3.
     """
-    logger.info(f"Event:\n{event}\n\n")
-    logger.info(f"Context:\n{context}\n\n")
+    logger.info(f"Event:\n\n{event}\n\n")
+    logger.info(f"Context:\n\n{context}\n\n")
 
-    # get bucket / s3_key pairs for new records
+    # get (bucketName, objectKey) pairs for new records
     newRecords = getNewRecordsFromEventObject(event)
 
     # handle each record
     s3Client = boto3.resource("s3")
-    for (sourceBucketName, sourceBucketKey) in newRecords:
+    for sourceBucketName, sourceBucketKey in newRecords:
         # load new logfile json object
-        newLogFile = loadLogfile(sourceBucketName, sourceBucketKey)
+        newLogFile = loadCloudtrailReportAsJsonObject(sourceBucketName, sourceBucketKey, s3Client)
 
         # process new logfile json object into a json string
         processedJsonString = processLogfile(newLogfile)
