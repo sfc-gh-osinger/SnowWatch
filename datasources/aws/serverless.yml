@@ -1,0 +1,182 @@
+# service name
+service: snowwatch
+
+# plugin to get aws account ID
+plugins:
+  - serverless-pseudo-parameters
+
+custom:
+  version: 1.0.0
+  awsConfigProfileName: ${opt:awsConfigProfileName, 'default'}
+  stage: ${opt:stage, 'prod'}
+  awsAccountID: '#{AWS::AccountId}'
+  cloudtrail:
+    trailName: ${self:service}
+  lambda:
+    runFrequencyInMinutes: 15 
+  s3:
+    bucketName: ${self:service}-${self:custom.awsAccountID}
+    ec2MonitoringPath: ec2_monitoring
+    securityGroupMonitoringPath: security_group_monitoring
+    iamMonitoringPath: iam_monitoring
+    elbMonitoringPath: elb_monitoring
+    cloudtrailRawPath: cloudtrail # raw logs go here
+    cloudtrailMonitoringPath: cloudtrail_monitoring # processed logs go here
+
+
+# cloud provider config
+provider:
+  name: aws
+  runtime: python3.6
+  stage: prod
+  region: us-east-1
+  profile: ${self:custom.awsConfigProfileName} # aws config profile to use from ~/.aws/config
+  environment:
+    S3_BUCKET_NAME: ${self:custom.s3.bucketName}
+    S3_EC2_MONITORING_PATH: ${self:custom.s3.ec2MonitoringPath}
+    S3_SG_MONITORING_PATH: ${self:custom.s3.securityGroupMonitoringPath}
+    S3_IAM_MONITORING_PATH: ${self:custom.s3.iamMonitoringPath}
+    S3_ELB_MONITORING_PATH: ${self:custom.s3.elbMonitoringPath}
+    S3_CLOUDTRAIL_RAW_PATH: ${self:custom.s3.cloudtrailRawPath}
+    S3_CLOUDTRAIL_MONITORING_PATH: ${self:custom.s3.cloudtrailMonitoringPath}
+  iamRoleStatements:
+    - Effect: Allow # allow writing to s3
+      Action:
+        - s3:PutObject
+      Resource:
+        - "arn:aws:s3:::${self:custom.s3.bucketName}/${self:custom.s3.ec2MonitoringPath}/*"
+        - "arn:aws:s3:::${self:custom.s3.bucketName}/${self:custom.s3.securityGroupMonitoringPath}/*"
+        - "arn:aws:s3:::${self:custom.s3.bucketName}/${self:custom.s3.iamMonitoringPath}/*"
+        - "arn:aws:s3:::${self:custom.s3.bucketName}/${self:custom.s3.elbMonitoringPath}/*"
+        - "arn:aws:s3:::${self:custom.s3.bucketName}/${self:custom.s3.cloudtrailMonitoringPath}/*"
+    - Effect: Allow # allow reading from s3
+      Action:
+        - s3:GetObject
+      Resource:
+        - "arn:aws:s3:::${self:custom.s3.bucketName}/${self:custom.s3.cloudtrailRawPath}/*"
+    - Effect: Allow # ec2 permissions
+      Action:
+        - ec2:DescribeInstances
+        - ec2:DescribeRegions # used to iterate through each region with ec2 entities instead of blindly checking everything
+        - ec2:DescribeSecurityGroups
+      Resource:
+        - '*'
+    - Effect: Allow # elb permissions
+      Action:
+        - elasticloadbalancing:DescribeLoadBalancers
+        - elasticloadbalancing:DescribeListeners
+      Resource:
+        - '*'
+    - Effect: Allow # iam permissions
+      Action:
+        - iam:GetAccountAuthorizationDetails
+        - iam:ListMFADevices
+      Resource:
+        - '*'
+  tags:
+    author: randy.pitcher@hashmapinc.com
+    githubLink: https://github.com/hashmapinc/SnowWatch
+    version: ${self:custom.version}
+    
+
+# define lambda functions
+functions:
+  monitorEc2Instances:
+    description: describes each ec2 instance in each region and writes the data to json files in s3
+    handler: ec2Monitoring.monitor
+    timeout: 60
+    events:
+      - schedule: rate(${self:custom.lambda.runFrequencyInMinutes} minutes)
+  monitorSecurityGroups:
+    description: describes each security group in each region and writes the data to json files in s3
+    handler: securityGroupMonitoring.monitor
+    timeout: 60
+    events:
+      - schedule: rate(${self:custom.lambda.runFrequencyInMinutes} minutes)
+  monitorELBs:
+    description: describes each elb in each region and writes the data to json files in s3
+    handler: elbMonitoring.monitor
+    timeout: 60
+    events:
+      - schedule: rate(${self:custom.lambda.runFrequencyInMinutes} minutes)
+  monitorIAM:
+    description: gathers user, policy, and MFA data and writes it to json files in s3
+    handler: iamMonitoring.monitor
+    timeout: 60
+    events:
+      - schedule: rate(${self:custom.lambda.runFrequencyInMinutes} minutes)
+  monitorCloudtrail:
+    description: preprocesses cloudtrail logs for snowflake when new logs are written to s3 and stores processed files in s3
+    handler: cloudtrailMonitoring.monitor
+    timeout: 120
+    events:
+      - s3:
+          bucket: snowwatch
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: ${self:custom.s3.cloudtrailRawPath}/
+
+
+# Create resources with separate CloudFormation templates
+resources:
+  - Resources:
+      # S3 bucket definition for snowwatch
+      S3BucketSnowwatch:
+        Type: AWS::S3::Bucket
+        Properties:
+          BucketName: ${self:custom.s3.bucketName}
+
+      # S3BucketSnowwatch permission to trigger a lambda function
+      MonitorCloudtrailLambdaPermissionSnowwatchS3:
+        Type: "AWS::Lambda::Permission"
+        Properties:
+          FunctionName:
+            "Fn::GetAtt":
+              - MonitorCloudtrailLambdaFunction
+              - Arn
+          Principal: "s3.amazonaws.com"
+          Action: "lambda:InvokeFunction"
+          SourceAccount:
+            Ref: AWS::AccountId
+          SourceArn: "arn:aws:s3:::${self:custom.s3.bucketName}"
+
+      # bucket policy to allow cloudtrail to use S3BucketSnowwatch
+      S3BucketSnowwatchCloudtrailPolicy:
+        Type: AWS::S3::BucketPolicy
+        DependsOn: S3BucketSnowwatch
+        Properties: 
+          Bucket: 
+            Ref: S3BucketSnowwatch
+          PolicyDocument: 
+            Statement: 
+              - 
+                Sid: "AWSCloudTrailAclCheck20150319"
+                Action: 
+                  - "s3:GetBucketAcl"
+                Effect: "Allow"
+                Resource: "arn:aws:s3:::${self:custom.s3.bucketName}"
+                Principal:
+                  Service: "cloudtrail.amazonaws.com"
+              - 
+                Sid: "AWSCloudTrailWrite20150319"
+                Action: 
+                  - "s3:PutObject"
+                Effect: "Allow"
+                Resource: "arn:aws:s3:::${self:custom.s3.bucketName}/${self:custom.s3.cloudtrailRawPath}/*"
+                Principal:
+                  Service: "cloudtrail.amazonaws.com"
+                Condition: 
+                  StringEquals: 
+                    s3:x-amz-acl: "bucket-owner-full-control"
+                    
+      # Cloudtrail trail that will write events to the snowwatch bucket
+      SnowflakeAnalyticsCloudtrail:
+        Type: AWS::CloudTrail::Trail
+        DependsOn: S3BucketSnowwatchCloudtrailPolicy
+        Properties: 
+          IncludeGlobalServiceEvents: true
+          IsLogging: true
+          IsMultiRegionTrail: true
+          S3BucketName: ${self:custom.s3.bucketName}
+          S3KeyPrefix: ${self:custom.s3.cloudtrailRawPath}
+          TrailName: ${self:custom.cloudtrail.trailName}
