@@ -1,15 +1,11 @@
 # service name
 service: snowwatch
 
-# plugin to get aws account ID
-plugins:
-  - serverless-pseudo-parameters
-
 custom:
   version: 1.0.0
   awsConfigProfileName: ${opt:awsConfigProfileName, 'default'}
   stage: ${opt:stage, 'prod'}
-  awsAccountID: '#{AWS::AccountId}'
+  awsAccountID: ${opt:account_id, ''} # required to make sure your s3 bucket is
   cloudtrail:
     trailName: ${self:service}
   lambda:

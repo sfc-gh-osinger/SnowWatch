@@ -15,7 +15,7 @@ S3_MONITORING_PATH = os.environ['S3_EC2_MONITORING_PATH']
 def getInstanceName(instance=None):
     """
     This method searches an ec2 instance object
-    for the Name tag and returns that value as a string
+    for the Name tag and returns that value as a string.
     """
     # return the name if possible, return empty string if not possible
     try:
