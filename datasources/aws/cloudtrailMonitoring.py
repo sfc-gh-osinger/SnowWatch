@@ -54,31 +54,16 @@ def getProcessedCloudtrailRecords(cloudtrailRecords=None):
     """
     This function accepts the 'Records' portion of a
     cloudtrail monitoring report as a json object
-    and extracts values for a valid json string that can
+    and extracts records to build a valid json string that can
     be stored in s3 and read by snowflake. The json string
-    will be an array of json objects parsed from the 
-    cloudtrailRecords list.
+    will be an array of records objects.
     """
     # validate input
     if not cloudtrailRecords :
         raise ValueError('cannot accept None / empty values')
 
     # get initialize processed records list
-    processedRecords = []
-
-    # build processed data
-    for cloudtrailRecord in cloudtrailRecords:
-        processedRecord = {}
-        processedRecord['EVENT_DATA'] = cloudtrailRecord
-        processedRecord['EVENT_REGION_NAME'] = cloudtrailRecord.setdefault('awsRegion', None)
-        processedRecord['EVENT_NAME'] = cloudtrailRecord.setdefault('eventName', None)
-        processedRecord['EVENT_SOURCE'] = cloudtrailRecord.setdefault('eventSource', None)
-        processedRecord['EVENT_TIME'] = cloudtrailRecord.setdefault('eventTime', None)
-        processedRecord['EVENT_TYPE'] = cloudtrailRecord.setdefault('eventType', None)
-        processedRecord['EVENT_SOURCE_IP'] = cloudtrailRecord.setdefault('sourceIPAddress', None)
-        processedRecord['EVENT_USER_AGENT'] = cloudtrailRecord.setdefault('userAgent', None)
-        processedRecord['EVENT_USER_ARN'] = cloudtrailRecord.setdefault('userIdentity', {}).setdefault('arn', None)
-        processedRecords.append(processedRecord)
+    processedRecords = [cloudtrailRecord for cloudtrailRecord in cloudtrailRecords]
 
     return json.dumps(processedRecords)
 
