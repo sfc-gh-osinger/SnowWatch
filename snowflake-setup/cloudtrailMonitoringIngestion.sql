@@ -1,8 +1,9 @@
 //===========================================================
 // Create cloudtrail monitoring objects
 //===========================================================
-// set role
+// set context
 USE ROLE SNOWWATCH_ROLE;
+USE WAREHOUSE SNOWWATCH_WAREHOUSE;
 
 // CREATE TABLE
 CREATE TABLE IF NOT EXISTS
