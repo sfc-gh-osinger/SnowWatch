@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS
     RAW_DATA        VARIANT,
     MONITORED_TIME  TIMESTAMP_TZ,  
     ARN             STRING,
-    CREATE_DATE     STRING,
+    CREATE_DATE     TIMESTAMP_TZ,
     PATH            STRING,
     ROLE_ID         STRING,
     ROLE_NAME       STRING
@@ -23,7 +23,7 @@ CREATE OR REPLACE PIPE
   AUTO_INGEST=TRUE
 AS 
   COPY INTO 
-    SNOWWATCH.AWS.IAM_USER_MONITORING_LANDING_ZONE 
+    SNOWWATCH.AWS.IAM_ROLE_MONITORING_LANDING_ZONE 
   FROM (
     SELECT 
       $1                                      AS RAW_DATA, 
@@ -33,7 +33,7 @@ AS
         ) || 'Z'
       )                                       AS MONITORED_TIME,
       $1:"Arn" :: STRING                      AS ARN,
-      $1:"CreateDate" :: STRING               AS CREATE_DATE,
+      $1:"CreateDate" :: TIMESTAMP_TZ         AS CREATE_DATE,
       $1:"Path" :: STRING                     AS PATH,
       $1:"RoleId" :: STRING                   AS ROLE_ID,
       $1:"RoleName" :: STRING                 AS ROLE_NAME
@@ -44,7 +44,7 @@ AS
     
 // Copy any data that may already exist
 COPY INTO 
-  SNOWWATCH.AWS.IAM_USER_MONITORING_LANDING_ZONE 
+  SNOWWATCH.AWS.IAM_ROLE_MONITORING_LANDING_ZONE 
 FROM (
   SELECT 
     $1                                      AS RAW_DATA, 
@@ -54,7 +54,7 @@ FROM (
       ) || 'Z'
     )                                       AS MONITORED_TIME,
     $1:"Arn" :: STRING                      AS ARN,
-    $1:"CreateDate" :: STRING               AS CREATE_DATE,
+    $1:"CreateDate" :: TIMESTAMP_TZ         AS CREATE_DATE,
     $1:"Path" :: STRING                     AS PATH,
     $1:"RoleId" :: STRING                   AS ROLE_ID,
     $1:"RoleName" :: STRING                 AS ROLE_NAME
