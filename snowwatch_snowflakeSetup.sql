@@ -56,25 +56,8 @@ GRANT OWNERSHIP ON DATABASE SNOWWATCH TO ROLE SNOWWATCH_ROLE;
 // set role
 USE ROLE SNOWWATCH_ROLE;
 
-// create schemas
+// create schema
 CREATE SCHEMA IF NOT EXISTS SNOWWATCH.BI;
-CREATE SCHEMA IF NOT EXISTS SNOWWATCH.AWS;
-
-// create file formats
-CREATE FILE FORMAT IF NOT EXISTS
-  SNOWWATCH.AWS.SNOWWATCH_JSON_ARRAY_FORMAT
-  TYPE=JSON
-  STRIP_OUTER_ARRAY=TRUE;
-
-// create stages
-CREATE STAGE IF NOT EXISTS
-  SNOWWATCH.AWS.SNOWWATCH_S3_STAGE
-  URL= '<your snowwatch bucket here>'  //'s3://snowwatch-' + your aws account ID
-  CREDENTIALS=(AWS_KEY_ID='<add your key here>' AWS_SECRET_KEY='<add your key here>')
-  FILE_FORMAT=SNOWWATCH.AWS.CLOUDTRAIL_MONITORING_JSON_FORMAT;
-
-// confirm stage works
-LIST @SNOWWATCH.AWS.SNOWWATCH_S3_STAGE;
 //===========================================================
 
 
