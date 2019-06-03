@@ -1,5 +1,5 @@
 //===========================================================
-// Create cloudtrail monitoring objects
+// Create iam role monitoring objects
 //===========================================================
 // set context
 USE ROLE SNOWWATCH_ROLE;

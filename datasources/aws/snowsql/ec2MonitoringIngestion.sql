@@ -1,5 +1,5 @@
 //===========================================================
-// Create cloudtrail monitoring objects
+// Create ec2 monitoring objects
 //===========================================================
 // set context
 USE ROLE SNOWWATCH_ROLE;

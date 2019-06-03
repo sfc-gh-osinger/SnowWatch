@@ -1,5 +1,5 @@
 //===========================================================
-// Create cloudtrail monitoring objects
+// Create iam policy monitoring objects
 //===========================================================
 // set context
 USE ROLE SNOWWATCH_ROLE;
@@ -8,18 +8,18 @@ USE WAREHOUSE SNOWWATCH_WAREHOUSE;
 // CREATE TABLE
 CREATE TABLE IF NOT EXISTS
   SNOWWATCH.AWS.IAM_POLICY_MONITORING_LANDING_ZONE (
-    RAW_DATA        VARIANT,
-    MONITORED_TIME  TIMESTAMP_TZ, 
-    $1:"Arn" :: STRING AS ARN,
-    $1:"AttachmentCount" :: INT AS ATTACHMENT_COUNT,
-    $1:"CreateDate" :: TIMESTAMP_TZ AS CREATE_DATE,
-    $1:"DefaultVersionId" :: STRING AS DEFAULT_VERSION_ID,
-    $1:"IsAttachable" :: BOOLEAN AS IS_ATTACHABLE,
-    $1:"Path" :: STRING AS PATH,
-    $1:"PermissionsBoundaryUsageCount" :: INT AS PERMISSIONS_BOUNDARY_USAGE_COUNT,
-    $1:"PolicyId" :: STRING AS POLICY_ID,
-    $1:"PolicyName" :: STRING AS POLICY_NAME,
-    $1:"UpdateDate" :: TIMESTAMP_TZ AS UPDATE_DATE
+    RAW_DATA                          VARIANT,
+    MONITORED_TIME                    TIMESTAMP_TZ, 
+    ARN                               STRING,
+    ATTACHMENT_COUNT                  INT,
+    CREATE_DATE                       TIMESTAMP_TZ,
+    DEFAULT_VERSION_ID                STRING,
+    IS_ATTACHABLE                     BOOLEAN,
+    PATH                              STRING,
+    PERMISSIONS_BOUNDARY_USAGE_COUNT  INT,
+    POLICY_ID                         STRING,
+    POLICY_NAME                       STRING,
+    UPDATE_DATE                       TIMESTAMP_TZ
   );
 
 // create pipe
