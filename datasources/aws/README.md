@@ -1,9 +1,9 @@
 <img src="https://raw.githubusercontent.com/hashmapinc/SnowWatch/master/docs/source/sw-logo-large.png" alt="SnowWatch"/>
 
 # AWS Datasource
-The SNOWWATCH AWS Datasource is designed to be gather data about your AWS infrastructure in a private S3 bucket owned entirely by you. 
+The SNOWWATCH AWS Datasource is designed to gather data about your AWS infrastructure in a private S3 bucket owned entirely by you. 
 
-The data in this S3 bucket is formatted in such a way that Snowflake can easily ingest the data automatically as it arrives in your S3 bucket.
+We then setup ingestion pipelines from your S3 bucket into Snowflake for further analysis. The data in this S3 bucket is formatted in such a way that Snowflake can easily ingest the data as it arrives.
 
 ## Serverless
 This datasource leverages the [Serverless Framework](https://serverless.com/) to deploy a series of Lambda functions and Cloudformation templates to start organizing your AWS data seamlessly.
