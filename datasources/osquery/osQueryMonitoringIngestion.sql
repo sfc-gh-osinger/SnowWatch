@@ -1,0 +1,42 @@
+//===========================================================
+// Create snowflake objects
+//===========================================================
+// set role
+USE ROLE SYSADMIN;
+
+// create schema inside database
+CREATE SCHEMA IF NOT EXISTS HASHMAP_DB.AWS;
+CREATE TABLE IF NOT EXISTS HASHMAP_DB.AWS.OSQUERY_MONITORING_LANDING_ZONE(LOGFILE VARCHAR(75), OSQUERY_DATA VARIANT);
+
+// create file format
+CREATE OR REPLACE FILE FORMAT
+  HASHMAP_DB.AWS.OSQUERY_MONITORING_JSON_FORMAT
+  TYPE=JSON
+  STRIP_OUTER_ARRAY=FALSE;
+
+// create stage
+CREATE STAGE IF NOT EXISTS
+  HASHMAP_DB.AWS.OSQUERY_MONITORING_STAGE
+  URL='s3://sf-snowalert-trail/endpoint_logs/'
+  CREDENTIALS=(AWS_KEY_ID='<add your key here>' AWS_SECRET_KEY='<add your key here>')
+  FILE_FORMAT=HASHMAP_DB.AWS.OSQUERY_MONITORING_JSON_FORMAT;
+
+// confirm stage works
+LIST @HASHMAP_DB.AWS.OSQUERY_MONITORING_STAGE;
+
+// create pipe
+CREATE OR REPLACE PIPE 
+  HASHMAP_DB.AWS.OSQUERY_MONITORING_PIPE
+  AUTO_INGEST=TRUE
+AS 
+  COPY INTO 
+    HASHMAP_DB.AWS.OSQUERY_MONITORING_LANDING_ZONE 
+  FROM (
+    SELECT 
+      METADATA$FILENAME AS LOGFILE, 
+      $1 AS INSTANCE_DATA 
+    FROM @HASHMAP_DB.AWS.OSQUERY_MONITORING_STAGE
+  );
+    
+// refresh pipe to catch any existing files in the stage
+ALTER PIPE HASHMAP_DB.AWS.OSQUERY_MONITORING_PIPE REFRESH;
