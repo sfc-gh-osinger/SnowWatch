@@ -7,9 +7,13 @@
 
 =======================================================================================================
 
+TL;DR
+-----
 SNOWWATCH is a collection of SQL commands and automated data harvesting scripts designed to let you efficiently ingest data from multiple cloud environments into the Snowflake Cloud Data Warehouse.
 
 The `Snowflake SnowAlert project <https://github.com/snowflakedb/SnowAlert>`_ is used to provide policy enforcement and alerting to improve the security, compliance, and affordability of your cloud infrastructure.
+
+Get right to business by :ref:`going to our Quickstart guide. <quickstart>`.
 
 What SNOWWATCH *is*
 ---------------------

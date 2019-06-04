@@ -1,3 +1,4 @@
+.. _quickstart:
 
 .. image:: https://raw.githubusercontent.com/hashmapinc/SnowWatch/master/docs/source/sw-logo-large.png
 
