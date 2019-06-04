@@ -22,12 +22,14 @@ GRANT ROLE SNOWWATCH_BI_READ_ROLE TO ROLE SYSADMIN;
 
 // grant results read role to snowwatch
 GRANT ROLE SNOWALERT_RESULTS_READ_ROLE TO ROLE SNOWWATCH_ROLE;
+
+// grant snowwatch_role to current user
+GRANT ROLE SNOWALERT_RESULTS_READ_ROLE TO USER CURRENT_USER; // replace this with your username
 //===========================================================
 
 
 //===========================================================
-// create snowflake objects and give them
-// to snowwatch
+// create top level objects and give them to snowwatch
 //===========================================================
 USE ROLE SYSADMIN;
 
@@ -42,14 +44,20 @@ CREATE DATABASE IF NOT EXISTS
   SNOWWATCH
   COMMENT='Database for holding snowwatch objects';
 
-CREATE SCHEMA IF NOT EXISTS SNOWWATCH.AWS;
-CREATE SCHEMA IF NOT EXISTS SNOWWATCH.BI;
-
 // grant ownership
 GRANT OWNERSHIP ON WAREHOUSE SNOWWATCH_WAREHOUSE TO ROLE SNOWWATCH_ROLE;
 GRANT OWNERSHIP ON DATABASE SNOWWATCH TO ROLE SNOWWATCH_ROLE;
-GRANT OWNERSHIP ON SCHEMA SNOWWATCH.AWS TO ROLE SNOWWATCH_ROLE;
-GRANT OWNERSHIP ON SCHEMA SNOWWATCH.BI TO ROLE SNOWWATCH_ROLE;
+//===========================================================
+
+
+//===========================================================
+// Create snowwatch objects
+//===========================================================
+// set role
+USE ROLE SNOWWATCH_ROLE;
+
+// create schema
+CREATE SCHEMA IF NOT EXISTS SNOWWATCH.BI;
 //===========================================================
 
 
