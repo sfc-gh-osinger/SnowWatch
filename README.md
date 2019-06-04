@@ -1,7 +1,7 @@
 <img src="https://raw.githubusercontent.com/hashmapinc/SnowWatch/master/docs/source/sw-logo-large.png" alt="SnowWatch"/>
 
 # SNOWWATCH
-SNOWWATCH is a collection of SQL commands and automated data harvesting stacks scripts designed to let you efficiently ingest data from multiple cloud environments into the Snowflake Cloud Data Warehouse.
+SNOWWATCH is a collection of SQL commands and automated data harvesting scripts designed to let you efficiently ingest data from multiple cloud environments into the Snowflake Cloud Data Warehouse.
 
 The [Snowflake SnowAlert project](https://github.com/snowflakedb/SnowAlert) is used to provide policy enforcement and alerting to improve the security, compliance, and affordability of your cloud infrastructure.
 

@@ -5,7 +5,7 @@ custom:
   version: 1.0.0
 
   # change these values 
-  awsConfigProfileName: ${opt:awsConfigProfileName, 'default'} # Change this if you want to use a different .aws/credentials profile or pass it in as an argument to the serverless command (serverless deploy --awsConfigProfileName altProfileName)
+  awsConfigProfileName: ${opt:aws_config_profile_name, 'default'} # Change this if you want to use a different .aws/credentials profile or pass it in as an argument to the serverless command (serverless deploy --awsConfigProfileName altProfileName)
   awsAccountID: ${opt:account_id, ''} # required to make sure your s3 bucket is unique. Replace this value with your account ID or pass it in as an argument to the serverless command (serverless deploy --account_id 123456)
 
   # change this value if you want to get data more frequently
