@@ -2,8 +2,8 @@
   "name": "snowwatch",
   "description": "",
   "version": "0.1.0",
-  "dependencies": {},
-  "devDependencies": {
-    "serverless-pseudo-parameters": "^2.4.0"
-  }
+  "dependencies": {
+    "serverless": "^1.44.1"
+  },
+  "devDependencies": {}
 }

@@ -3,26 +3,32 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to the SnowWatch documentation!
-=======================================
+.. image:: https://raw.githubusercontent.com/hashmapinc/SnowWatch/master/docs/source/sw-logo-large.png
 
-SnowWatch is a security analytics platform that uses the Snowflake data
-warehouse and SnowAlert to provide three main features:
+=======================================================================================================
 
-1. Security
-2. Visibility
-3. Cost Optimization
+SNOWWATCH is a collection of SQL commands and automated data harvesting scripts designed to let you efficiently ingest data from multiple cloud environments into the Snowflake Cloud Data Warehouse.
+
+The `Snowflake SnowAlert project <https://github.com/snowflakedb/SnowAlert>`_ is used to provide policy enforcement and alerting to improve the security, compliance, and affordability of your cloud infrastructure.
+
+What SNOWWATCH *is*
+---------------------
+Working with many clients who implement cloud monitoring solutions (with various levels of success), SNOWWATCH is our best effort at a minimalist and reliable data ingestion pattern. 
+
+The pattern is meant to make cloud data ingestion repeatable and trustworthy. You are encouraged to take the basic patterns in this project and expand them with your business-specific needs. SNOWWATCH is simply a starting point with data engineering best-practices built in.
+
+What SNOWWATCH *is not*
+-------------------------
+SNOWWATCH is not a platform and it is not a magic solution. This project will not replace your security and site reliability teams. 
+
+However, when used responsibly, this collection of ingestion patterns could save you time and money by allowing your engineers to focus more on business logic and less on setup.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
+    :hidden:
 
-   snowalert/deploy
+    quickstart
+    snowalert/deploy
+    datasources/datasources
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

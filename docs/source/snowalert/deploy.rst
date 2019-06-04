@@ -1,3 +1,4 @@
+.. _snowalert-deploy:
 
 SnowAlert Deployment
 ====================
