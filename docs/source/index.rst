@@ -7,7 +7,7 @@
 
 =======================================================================================================
 
-TL;DR
+Overview
 -----
 SNOWWATCH is a collection of SQL commands and automated data harvesting scripts designed to let you efficiently ingest data from multiple cloud environments into the Snowflake Cloud Data Warehouse.
 
